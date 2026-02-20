@@ -49,6 +49,7 @@ app.delete('/api/persons/:id', (request, response) => {
 app.post('/api/persons/', (request, response) => {
   let newContact = request.body
   newContact.id = String(Math.floor(Math.random() * 100))
+<<<<<<< HEAD
 
   const person = new Person({ // instance of Person "class"
     name: newContact.name,
@@ -62,9 +63,14 @@ app.post('/api/persons/', (request, response) => {
   })
 
   response.json(person)
+=======
+  contacts.push(newContact)
+  response.status(204).end()
+>>>>>>> 23f6c42567ea3a3bcb1c0cb7ad4c3d3087b5a6ac
 })
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Backend server running on port ${PORT}`)
+
 })
