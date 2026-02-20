@@ -14,8 +14,6 @@ morgan.token('body', (req) => {
   return req.method === 'POST' ? JSON.stringify(req.body) : ''
 })
 
-const Person = mongoose.model('Person', personSchema)
-
 app.get('/api/persons', (request, response) => {
   Person
     .find({})
@@ -25,10 +23,8 @@ app.get('/api/persons', (request, response) => {
 })
 
 app.get('/api/persons/:id', (request, response) => {
-  Person
-    .find({})
-    .then(persons => {
-    //mongoose.connection.close()
+  Person.findById(request.params.id).then(person => {
+    response.json(person)
   })
 })
 
@@ -39,17 +35,12 @@ app.get('/info', (request, response) => {
 })
 
 app.delete('/api/persons/:id', (request, response) => {
-  const id = request.params.id
-  contacts = contacts.filter(contact => contact.id !== id)
-  console.log(contacts)
-
-  response.status(204).end()
+  console.log('delete feature still in development')
 })
 
 app.post('/api/persons/', (request, response) => {
   let newContact = request.body
   newContact.id = String(Math.floor(Math.random() * 100))
-<<<<<<< HEAD
 
   const person = new Person({ // instance of Person "class"
     name: newContact.name,
@@ -59,14 +50,9 @@ app.post('/api/persons/', (request, response) => {
   
   person.save().then(result => {
     console.log('New note saved!')
-    //mongoose.connection.close()
+    response.json(result)
   })
 
-  response.json(person)
-=======
-  contacts.push(newContact)
-  response.status(204).end()
->>>>>>> 23f6c42567ea3a3bcb1c0cb7ad4c3d3087b5a6ac
 })
 
 const PORT = process.env.PORT
