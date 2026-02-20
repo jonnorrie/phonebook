@@ -1,49 +1,35 @@
+require('dotenv').config()
 const express = require('express')
 const app = express()
 const morgan = require('morgan')
 const cors = require('cors')
+const Person = require('./models/person')
 
 app.use(express.json())
 app.use(morgan('tiny'))
 app.use(cors())
-app.use(express.static('dist'))
+//app.use(express.static('dist'))
 
 morgan.token('body', (req) => {
   return req.method === 'POST' ? JSON.stringify(req.body) : ''
 })
 
-let contacts = [
-    { 
-      "id": "1",
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": "2",
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": "3",
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": "4",
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
-]
+const Person = mongoose.model('Person', personSchema)
 
 app.get('/api/persons', (request, response) => {
-  response.json(contacts) 
+  Person
+    .find({})
+    .then(persons => {
+    response.json(persons)
+  })
 })
 
-
 app.get('/api/persons/:id', (request, response) => {
-  const id = request.params.id
-  const contact = contacts.find(contact => contact.id === id)
-  response.json(contact)
+  Person
+    .find({})
+    .then(persons => {
+    //mongoose.connection.close()
+  })
 })
 
 app.get('/info', (request, response) => {
@@ -63,10 +49,22 @@ app.delete('/api/persons/:id', (request, response) => {
 app.post('/api/persons/', (request, response) => {
   let newContact = request.body
   newContact.id = String(Math.floor(Math.random() * 100))
-  contacts.push(newContact)
+
+  const person = new Person({ // instance of Person "class"
+    name: newContact.name,
+    number: newContact.number,
+    id: newContact.id
+  })
+  
+  person.save().then(result => {
+    console.log('New note saved!')
+    //mongoose.connection.close()
+  })
+
+  response.json(person)
 })
 
-const PORT = 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Backend server running on port ${PORT}`)
 })
