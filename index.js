@@ -64,9 +64,11 @@ app.post('/api/persons/', (request, response) => {
   let newContact = request.body
   newContact.id = String(Math.floor(Math.random() * 100))
   contacts.push(newContact)
+  response.status(204).end()
 })
 
 const PORT = 3001
 app.listen(PORT, () => {
   console.log(`Backend server running on port ${PORT}`)
+
 })
