@@ -4,28 +4,42 @@ const app = express()
 const morgan = require('morgan')
 const cors = require('cors')
 const Person = require('./models/person')
+const errorHandler = (error, request, repsonse, next) => {
+  console.error(error.message)
 
-app.use(express.json())
-app.use(morgan('tiny'))
-app.use(cors())
-app.use(express.static('dist'))
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
+  }
+
+  next(error)
+}
+
+app.use(express.static('dist'));
+app.use(express.json());
+app.use(morgan('tiny'));
+//app.use(cors());
+app.use(errorHandler);
 
 morgan.token('body', (req) => {
   return req.method === 'POST' ? JSON.stringify(req.body) : ''
 })
 
+
 app.get('/api/persons', (request, response) => {
   Person
     .find({})
     .then(persons => {
-    response.json(persons)
-  })
+      response.json(persons)
+    })
 })
 
 app.get('/api/persons/:id', (request, response) => {
-  Person.findById(request.params.id).then(person => {
-    response.json(person)
-  })
+  Person.findById(request.params.id)
+    .then(person => {
+      response.json(person)
+    })
 })
 
 app.get('/info', (request, response) => {
@@ -35,10 +49,15 @@ app.get('/info', (request, response) => {
 })
 
 app.delete('/api/persons/:id', (request, response) => {
-  console.log('delete feature still in development')
+  Person
+    .findByIdAndDelete(request.params.id)
+    .then(result => {
+      response.status(204).end()
+    })
+    .catch(error => next(error))
 })
 
-app.post('/api/persons/', (request, response) => {
+app.post('/api/persons/', (request, response, next) => {
   let newContact = request.body
   newContact.id = String(Math.floor(Math.random() * 100))
 
@@ -49,9 +68,10 @@ app.post('/api/persons/', (request, response) => {
   })
   
   person.save().then(result => {
-    console.log('New note saved!')
+    console.log('New person saved!')
     response.json(result)
   })
+  .catch(error => next(error))
 
 })
 
